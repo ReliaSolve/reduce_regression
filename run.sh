@@ -23,6 +23,7 @@ echo "Checking $new against $orig"
 #####################
 # Make sure the reduce submodule is checked out
 
+echo "Updating submodule"
 git submodule update --init
 
 ######################
@@ -30,11 +31,13 @@ git submodule update --init
 # The original version is build using Make because older versions don't
 # have CMakeLists.txt files.
 
-(cd reduce; git checkout $orig; make)
+echo "Building $orig"
+(cd reduce; git checkout $orig; make) &> /dev/null 
 
-(cd reduce; git checkout $new)
+echo "Building $new"
+(cd reduce; git checkout $new) &> /dev/null
 mkdir -p build_new
-(cd build_new; cmake ../reduce; make)
+(cd build_new; cmake ../reduce; make) &> /dev/null
 
 orig_exe="./reduce/reduce_src/reduce"
 new_exe="./build_new/reduce_src/reduce"
@@ -44,6 +47,7 @@ new_exe="./build_new/reduce_src/reduce"
 # output and standard error to different files.
 # Test the standard outputs to see if any differences are other than we expect.
 
+echo
 mkdir -p outputs
 files=`ls test_files`
 failed=0
@@ -61,5 +65,6 @@ for f in $files; do
   if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
 done
 
+echo
 if [ $failed -eq 0 ]; then echo "Success!"; else echo "$failed files failed"; fi
 
