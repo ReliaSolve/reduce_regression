@@ -18,3 +18,5 @@ In any case, all of the standard output and standard error files are written
 into an **outputs** directory, along with the standard-output file that have
 the reduce line stripped off.
 
+The script exits with code 0 on success and the number of failures if any comparison failed.
+

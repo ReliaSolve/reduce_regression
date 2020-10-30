@@ -66,5 +66,12 @@ for f in $files; do
 done
 
 echo
-if [ $failed -eq 0 ]; then echo "Success!"; else echo "$failed files failed"; fi
+if [ $failed -eq 0 ]
+then
+  echo "Success!"
+else
+  echo "$failed files failed"
+fi
+
+exit $failed
 
