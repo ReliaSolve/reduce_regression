@@ -20,6 +20,11 @@ if [ "$2" != "" ] ; then orig="$2" ; fi
 
 echo "Checking $new against $orig"
 
+#####################
+# Make sure the reduce submodule is checked out
+
+git submodule update --init
+
 ######################
 # Check out each version and build each.
 # The original version is build using Make because older versions don't
