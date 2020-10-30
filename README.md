@@ -4,8 +4,8 @@ Regression tests for the Reduce repository.
 ## Running
 There is a `run.sh` BASH script that will build the original version of
 Reduce to compare against (defaults to commit e31d8e0ef14e6e8b85634dea502cadac9cf7832b,
-but adding a single command-line argument can specify another git tag) against
-a more recent version (defaults to the main branch but a second command-line argument
+but adding a second command-line argument can specify another git tag) against
+a more recent version (defaults to the master branch but a first command-line argument
 can specify another git tag).
 
 This script compiles both versions and then runs each against every file in the
