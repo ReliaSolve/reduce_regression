@@ -52,6 +52,9 @@ mkdir -p outputs
 files=`ls test_files`
 failed=0
 for f in $files; do
+  ##############################################
+  # Test with no command-line arguments
+
   echo "Testing file $f"
   $orig_exe test_files/$f > outputs/$f.orig 2> outputs/$f.orig.stderr
   $new_exe test_files/$f > outputs/$f.new 2> outputs/$f.new.stderr
@@ -60,9 +63,21 @@ for f in $files; do
   grep -v reduce < outputs/$f.orig > outputs/$f.orig.strip
   grep -v reduce < outputs/$f.new > outputs/$f.new.strip
 
+  ##############################################
+  # Test with -TRIM command-line argument
+
+  echo "Testing file $f with -TRIM"
+  $orig_exe -TRIM test_files/$f > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr
+  $new_exe -TRIM test_files/$f > outputs/$f.TRIM.new 2> outputs/$f.TRIM.new.stderr
+
+  # Strip out expected differences
+  grep -v reduce < outputs/$f.TRIM.orig > outputs/$f.TRIM.orig.strip
+  grep -v reduce < outputs/$f.TRIM.new > outputs/$f.TRIM.new.strip
+
   # Test for unexpected differences
-  d=`diff outputs/$f.orig.strip outputs/$f.new.strip | wc -c`
+  d=`diff outputs/$f.TRIM.orig.strip outputs/$f.TRIM.new.strip | wc -c`
   if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
+
 done
 
 echo
