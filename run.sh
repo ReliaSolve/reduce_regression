@@ -53,16 +53,15 @@ files=`ls test_files`
 failed=0
 for f in $files; do
   ##############################################
+  # Full input-file name
+  inf=test_files/$f
+
+  ##############################################
   # Test with no command-line arguments
 
-  # unzip each file into a temporary file
-  tf=$(mktemp /tmp/test_pdb.XXXXXX)
-  gunzip < test_files/$f > $tf
-
   echo "Testing file $f"
-  $orig_exe $tf > outputs/$f.orig 2> outputs/$f.orig.stderr
-  $new_exe $tf > outputs/$f.new 2> outputs/$f.new.stderr
-  rm -f $tf
+  gunzip < $inf | $orig_exe - > outputs/$f.orig 2> outputs/$f.orig.stderr
+  gunzip < $inf | $new_exe - > outputs/$f.new 2> outputs/$f.new.stderr
 
   # Strip out expected differences
   grep -v reduce < outputs/$f.orig > outputs/$f.orig.strip
@@ -72,8 +71,8 @@ for f in $files; do
   # Test with -TRIM command-line argument
 
   echo "Testing file $f with -TRIM"
-  $orig_exe -TRIM test_files/$f > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr
-  $new_exe -TRIM test_files/$f > outputs/$f.TRIM.new 2> outputs/$f.TRIM.new.stderr
+  gunzip < $inf | $orig_exe -TRIM - > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr
+  gunzip < $inf | $new_exe -TRIM - > outputs/$f.TRIM.new 2> outputs/$f.TRIM.new.stderr
 
   # Strip out expected differences
   grep -v reduce < outputs/$f.TRIM.orig > outputs/$f.TRIM.orig.strip
