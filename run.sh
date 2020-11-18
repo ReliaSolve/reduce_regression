@@ -37,7 +37,7 @@ echo "Building $orig"
 echo "Building $new"
 (cd reduce; git checkout $new) &> /dev/null
 mkdir -p build_new
-(cd build_new; cmake ../reduce; make) &> /dev/null
+(cd build_new; cmake -DCMAKE_BUILD_TYPE=Release ../reduce; make) &> /dev/null
 
 orig_exe="./reduce/reduce_src/reduce"
 new_exe="./build_new/reduce_src/reduce"
