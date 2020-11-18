@@ -55,9 +55,14 @@ for f in $files; do
   ##############################################
   # Test with no command-line arguments
 
+  # unzip each file into a temporary file
+  tf=$(mktemp /tmp/test_pdb.XXXXXX)
+  gunzip < test_files/$f > $tf
+
   echo "Testing file $f"
-  $orig_exe test_files/$f > outputs/$f.orig 2> outputs/$f.orig.stderr
-  $new_exe test_files/$f > outputs/$f.new 2> outputs/$f.new.stderr
+  $orig_exe $tf > outputs/$f.orig 2> outputs/$f.orig.stderr
+  $new_exe $tf > outputs/$f.new 2> outputs/$f.new.stderr
+  rm -f $tf
 
   # Strip out expected differences
   grep -v reduce < outputs/$f.orig > outputs/$f.orig.strip
@@ -77,7 +82,6 @@ for f in $files; do
   # Test for unexpected differences
   d=`diff outputs/$f.TRIM.orig.strip outputs/$f.TRIM.new.strip | wc -c`
   if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
-
 done
 
 echo
