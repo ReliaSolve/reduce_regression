@@ -60,8 +60,10 @@ for f in $files; do
   # Test with no command-line arguments
 
   echo "Testing file $f"
-  gunzip < $inf | $orig_exe - > outputs/$f.orig 2> outputs/$f.orig.stderr
-  gunzip < $inf | $new_exe - > outputs/$f.new 2> outputs/$f.new.stderr
+  # Run old and new versions in parallel
+  (gunzip < $inf | $orig_exe - > outputs/$f.orig 2> outputs/$f.orig.stderr) &
+  (gunzip < $inf | $new_exe - > outputs/$f.new 2> outputs/$f.new.stderr) &
+  wait
 
   # Strip out expected differences
   grep -v reduce < outputs/$f.orig > outputs/$f.orig.strip
@@ -71,8 +73,10 @@ for f in $files; do
   # Test with -TRIM command-line argument
 
   echo "Testing file $f with -TRIM"
-  gunzip < $inf | $orig_exe -TRIM - > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr
-  gunzip < $inf | $new_exe -TRIM - > outputs/$f.TRIM.new 2> outputs/$f.TRIM.new.stderr
+  # Run old and new versions in parallel
+  (gunzip < $inf | $orig_exe -TRIM - > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr) &
+  (gunzip < $inf | $new_exe -TRIM - > outputs/$f.TRIM.new 2> outputs/$f.TRIM.new.stderr) &
+  wait
 
   # Strip out expected differences
   grep -v reduce < outputs/$f.TRIM.orig > outputs/$f.TRIM.orig.strip
