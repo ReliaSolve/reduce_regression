@@ -56,13 +56,19 @@ for f in $files; do
   # Full input-file name
   inf=test_files/$f
 
+  # We must extract to a file and then run with that file as a command-line argument
+  # because the original version did not process all models in a file when run with
+  # the model coming on standard input.
+  tfile=outputs/temp_file.tmp
+  gunzip < $inf > $tfile
+
   ##############################################
   # Test with no command-line arguments
 
   echo "Testing file $f"
   # Run old and new versions in parallel
-  (gunzip < $inf | $orig_exe - > outputs/$f.orig 2> outputs/$f.orig.stderr) &
-  (gunzip < $inf | $new_exe - > outputs/$f.new 2> outputs/$f.new.stderr) &
+  ($orig_exe $tfile > outputs/$f.orig 2> outputs/$f.orig.stderr) &
+  ($new_exe $tfile > outputs/$f.new 2> outputs/$f.new.stderr) &
   wait
 
   # Strip out expected differences
@@ -74,8 +80,8 @@ for f in $files; do
 
   echo "Testing file $f with -TRIM"
   # Run old and new versions in parallel
-  (gunzip < $inf | $orig_exe -TRIM - > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr) &
-  (gunzip < $inf | $new_exe -TRIM - > outputs/$f.TRIM.new 2> outputs/$f.TRIM.new.stderr) &
+  ($orig_exe -TRIM $tfile > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr) &
+  ($new_exe -TRIM $tfile > outputs/$f.TRIM.new 2> outputs/$f.TRIM.new.stderr) &
   wait
 
   # Strip out expected differences
