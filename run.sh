@@ -14,7 +14,7 @@
 # Parse the command line
 
 new="master"
-orig="e31d8e0ef14e6e8b85634dea502cadac9cf7832b"
+orig="9eda3be94ea08e617583a0bbbcba90284aa11d7b"
 if [ "$1" != "" ] ; then new="$1" ; fi
 if [ "$2" != "" ] ; then orig="$2" ; fi
 
@@ -25,6 +25,7 @@ echo "Checking $new against $orig"
 
 echo "Updating submodule"
 git submodule update --init
+(cd reduce; git pull) &> /dev/null 
 
 ######################
 # Check out each version and build each.
@@ -74,6 +75,10 @@ for f in $files; do
   # Strip out expected differences
   grep -v reduce < outputs/$f.orig > outputs/$f.orig.strip
   grep -v reduce < outputs/$f.new > outputs/$f.new.strip
+
+  # Test for unexpected differences
+  d=`diff outputs/$f.orig.strip outputs/$f.new.strip | wc -c`
+  if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
 
   ##############################################
   # Test with -TRIM command-line argument
