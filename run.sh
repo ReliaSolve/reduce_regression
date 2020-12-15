@@ -23,9 +23,8 @@ echo "Checking $new against $orig"
 #####################
 # Make sure the reduce submodule is checked out
 
-echo "Updating submodule and fetching new changes to target"
+echo "Updating submodule"
 git submodule update --init
-(cd reduce; git fetch origin $new)
 
 ######################
 # Check out each version and build each.
@@ -37,6 +36,7 @@ echo "Building $orig"
 
 echo "Building $new"
 (cd reduce; git checkout $new) &> /dev/null
+(cd reduce; git pull)
 mkdir -p build_new
 (cd build_new; cmake -DCMAKE_BUILD_TYPE=Release ../reduce; make) &> /dev/null
 
