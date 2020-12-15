@@ -23,9 +23,9 @@ echo "Checking $new against $orig"
 #####################
 # Make sure the reduce submodule is checked out
 
-echo "Updating submodule"
+echo "Updating submodule and fetching new changes to target"
 git submodule update --init
-(cd reduce; git pull) &> /dev/null 
+(cd reduce; git fetch origin $new)
 
 ######################
 # Check out each version and build each.
@@ -42,6 +42,11 @@ mkdir -p build_new
 
 orig_exe="./reduce/reduce_src/reduce"
 new_exe="./build_new/reduce_src/reduce"
+
+# Get what we need to run Python locally with the pyreduce shared library
+cp ./build_new/reduce_src/pyreduce.so .
+cp ./reduce/reduce_src/reduce.py .
+python_script="./reduce.py"
 
 ######################
 # Generate two outputs for each test file, redirecting standard
@@ -70,14 +75,18 @@ for f in $files; do
   # Run old and new versions in parallel
   ($orig_exe $tfile > outputs/$f.orig 2> outputs/$f.orig.stderr) &
   ($new_exe $tfile > outputs/$f.new 2> outputs/$f.new.stderr) &
+  (python $python_script $tfile > outputs/$f.py 2> outputs/$f.py.stderr) &
   wait
 
   # Strip out expected differences
   grep -v reduce < outputs/$f.orig > outputs/$f.orig.strip
   grep -v reduce < outputs/$f.new > outputs/$f.new.strip
+  grep -v reduce < outputs/$f.py > outputs/$f.py.strip
 
   # Test for unexpected differences
   d=`diff outputs/$f.orig.strip outputs/$f.new.strip | wc -c`
+  if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
+  d=`diff outputs/$f.orig.strip outputs/$f.py.strip | wc -c`
   if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
 
   ##############################################
@@ -87,14 +96,18 @@ for f in $files; do
   # Run old and new versions in parallel
   ($orig_exe -TRIM $tfile > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr) &
   ($new_exe -TRIM $tfile > outputs/$f.TRIM.new 2> outputs/$f.TRIM.new.stderr) &
+  (python $python_script -TRIM $tfile > outputs/$f.TRIM.py 2> outputs/$f.TRIM.py.stderr) &
   wait
 
   # Strip out expected differences
   grep -v reduce < outputs/$f.TRIM.orig > outputs/$f.TRIM.orig.strip
   grep -v reduce < outputs/$f.TRIM.new > outputs/$f.TRIM.new.strip
+  grep -v reduce < outputs/$f.TRIM.py > outputs/$f.TRIM.py.strip
 
   # Test for unexpected differences
   d=`diff outputs/$f.TRIM.orig.strip outputs/$f.TRIM.new.strip | wc -c`
+  if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
+  d=`diff outputs/$f.TRIM.orig.strip outputs/$f.TRIM.py.strip | wc -c`
   if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
 done
 
