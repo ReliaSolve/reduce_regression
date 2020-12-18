@@ -35,6 +35,7 @@ echo "Building $orig"
 (cd reduce; git checkout $orig; make) &> /dev/null 
 
 echo "Building $new"
+(cd reduce; git fetch)
 (cd reduce; git checkout $new) &> /dev/null
 (cd reduce; git pull)
 mkdir -p build_new
@@ -43,8 +44,8 @@ mkdir -p build_new
 orig_exe="./reduce/reduce_src/reduce"
 new_exe="./build_new/reduce_src/reduce"
 
-# Get what we need to run Python locally with the pyreduce shared library
-cp ./build_new/reduce_src/pyreduce.so .
+# Get what we need to run Python locally with the cctbx_reduce_ext shared library
+cp ./build_new/reduce_src/cctbx_reduce_ext.so .
 cp ./reduce/reduce_src/reduce.py .
 python_script="./reduce.py"
 
