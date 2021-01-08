@@ -36,12 +36,19 @@ echo "Building $orig"
 (cd reduce; git checkout $orig; make) &> /dev/null 
 
 echo "Building $new"
+(cd reduce; git fetch)
 (cd reduce; git checkout $new) &> /dev/null
+(cd reduce; git pull)
 mkdir -p build_new
 (cd build_new; cmake -DCMAKE_BUILD_TYPE=Release ../reduce; make) &> /dev/null
 
 orig_exe="./reduce/reduce_src/reduce"
 new_exe="./build_new/reduce_src/reduce"
+
+# Get what we need to run Python locally with the mmtbx_reduce_ext shared library
+cp ./build_new/reduce_src/mmtbx_reduce_ext.so .
+cp ./reduce/reduce_src/reduce.py .
+python_script="./reduce.py"
 
 ######################
 # Generate two outputs for each test file, redirecting standard
@@ -70,11 +77,19 @@ for f in $files; do
   # Run old and new versions in parallel
   ($orig_exe $tfile > outputs/$f.orig 2> outputs/$f.orig.stderr) &
   ($new_exe $tfile > outputs/$f.new 2> outputs/$f.new.stderr) &
+  (python $python_script $tfile > outputs/$f.py 2> outputs/$f.py.stderr) &
   wait
 
   # Strip out expected differences
   grep -v reduce < outputs/$f.orig > outputs/$f.orig.strip
   grep -v reduce < outputs/$f.new > outputs/$f.new.strip
+  grep -v reduce < outputs/$f.py > outputs/$f.py.strip
+
+  # Test for unexpected differences
+  d=`diff outputs/$f.orig.strip outputs/$f.new.strip | wc -c`
+  if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
+  d=`diff outputs/$f.orig.strip outputs/$f.py.strip | wc -c`
+  if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
 
   # Test for unexpected differences
   d=`diff outputs/$f.orig.strip outputs/$f.new.strip | wc -c`
@@ -87,14 +102,18 @@ for f in $files; do
   # Run old and new versions in parallel
   ($orig_exe -TRIM $tfile > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr) &
   ($new_exe -TRIM $tfile > outputs/$f.TRIM.new 2> outputs/$f.TRIM.new.stderr) &
+  (python $python_script -TRIM $tfile > outputs/$f.TRIM.py 2> outputs/$f.TRIM.py.stderr) &
   wait
 
   # Strip out expected differences
   grep -v reduce < outputs/$f.TRIM.orig > outputs/$f.TRIM.orig.strip
   grep -v reduce < outputs/$f.TRIM.new > outputs/$f.TRIM.new.strip
+  grep -v reduce < outputs/$f.TRIM.py > outputs/$f.TRIM.py.strip
 
   # Test for unexpected differences
   d=`diff outputs/$f.TRIM.orig.strip outputs/$f.TRIM.new.strip | wc -c`
+  if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
+  d=`diff outputs/$f.TRIM.orig.strip outputs/$f.TRIM.py.strip | wc -c`
   if [ $d -ne 0 ]; then echo " Failed!"; failed=$((failed + 1)); fi
 done
 
