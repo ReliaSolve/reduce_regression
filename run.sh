@@ -19,7 +19,7 @@ rm -f mmtbx_reduce_ext.so
 # Parse the command line
 
 new="master"
-orig="9eda3be94ea08e617583a0bbbcba90284aa11d7b"
+orig="fcbdf1821e02661b7b3a637a1e57bcad6ba1cea9"
 if [ "$1" != "" ] ; then new="$1" ; fi
 if [ "$2" != "" ] ; then orig="$2" ; fi
 
