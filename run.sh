@@ -48,6 +48,7 @@ mkdir -p build_new
 (cd build_new; cmake -DCMAKE_BUILD_TYPE=Release ../reduce; make) &> /dev/null
 
 orig_exe="./reduce/reduce_src/reduce"
+orig_args="-rad0.25"
 new_exe="./build_new/reduce_src/reduce"
 
 # See if we are building Python
@@ -89,7 +90,7 @@ for f in $files; do
 
   echo "Testing file $f"
   # Run old and new versions in parallel
-  ($orig_exe $tfile > outputs/$f.orig 2> outputs/$f.orig.stderr) &
+  ($orig_exe $orig_args $tfile > outputs/$f.orig 2> outputs/$f.orig.stderr) &
   ($new_exe $tfile > outputs/$f.new 2> outputs/$f.new.stderr) &
   if [ "$PYTHON" -eq "1" ]; then
     (python $python_script $tfile > outputs/$f.py 2> outputs/$f.py.stderr) &
@@ -116,7 +117,7 @@ for f in $files; do
 
   echo "Testing file $f with -TRIM"
   # Run old and new versions in parallel
-  ($orig_exe -TRIM $tfile > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr) &
+  ($orig_exe $orig_args -TRIM $tfile > outputs/$f.TRIM.orig 2> outputs/$f.TRIM.orig.stderr) &
   ($new_exe -TRIM $tfile > outputs/$f.TRIM.new 2> outputs/$f.TRIM.new.stderr) &
   if [ "$PYTHON" -eq "1" ]; then
     (python $python_script -TRIM $tfile > outputs/$f.TRIM.py 2> outputs/$f.TRIM.py.stderr) &
@@ -143,7 +144,7 @@ for f in $files; do
 
   echo "Testing file $f with -FLIP"
   # Run old and new versions in parallel
-  ($orig_exe -FLIP $tfile > outputs/$f.FLIP.orig 2> outputs/$f.FLIP.orig.stderr) &
+  ($orig_exe $orig_args -FLIP $tfile > outputs/$f.FLIP.orig 2> outputs/$f.FLIP.orig.stderr) &
   ($new_exe -FLIP $tfile > outputs/$f.FLIP.new 2> outputs/$f.FLIP.new.stderr) &
   if [ "$PYTHON" -eq "1" ]; then
     (python $python_script -FLIP $tfile > outputs/$f.FLIP.py 2> outputs/$f.FLIP.py.stderr) &
