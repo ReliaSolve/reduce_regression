@@ -20,3 +20,14 @@ the reduce line stripped off.
 
 The script exits with code 0 on success and the number of failures if any comparison failed.
 
+## Test files:
+Most test files are from a set of around 200 standard files that the Richardsons sent.
+Others are more specific.
+- 7k00 - Very large file with HET atoms that have special charges
+
+Some have unusual structures and we want to make sure that we can continue to read them
+properly.
+- 2mr5 - NMR structure with 20 models
+- 1b5s - atoms only out to Cbeta (at 4.4Å resolution)
+- 3w6s - Phe A 105 is missing just the Ce2 atom in the ring
+
